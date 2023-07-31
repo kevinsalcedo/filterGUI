@@ -1,5 +1,6 @@
 package com.kev.sal.filtergui;
 
+import com.kev.sal.filtergui.util.objects.GameSettings;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -28,26 +29,19 @@ public class MainController {
 
     @FXML
     private ComboBox<Game> gameTypeField;
-    private Game gameType;
     @FXML
     private CheckBox hintsField;
-    private boolean includeHints;
-    @FXML
-    private Label hintEndLabel;
-    @FXML
-    private CheckBox hintEndField;
-    private boolean includeHintEnds;
     @FXML
     private CheckBox givenField;
-    private boolean includeGivenLetters;
+    @FXML
+    private Label givenEndLabel;
+    @FXML
+    private CheckBox givenEndField;
     @FXML
     private Label numGivenLabel;
     @FXML
     private ComboBox numGivenField;
-    private int numGivenLetters;
 
-    private String targetFileName;
-    private String incompatibleFileName;
 
     @FXML
     protected void initialize() {
@@ -57,7 +51,6 @@ public class MainController {
             this.gameTypeField.setValue(Game.SEVENS);
         }
         // Initialize hints value to be true
-        this.includeHints=true;
         if(this.hintsField != null) {
             this.hintsField.setSelected(true);
         }
@@ -75,66 +68,60 @@ public class MainController {
      */
     @FXML
     protected void handleSourceFileChooserAction(ActionEvent e) {
-        // TODO: Restrict filetypes to .txt files
         FileChooser fc = new FileChooser();
+        // Restrict filetypes to .txt
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TXT files (*.txt)", "*.txt");
+        fc.getExtensionFilters().add(extFilter);
         Stage stage = (Stage) sourceFileName.getScene().getWindow();
         this.sourceFile = fc.showOpenDialog(stage);
         // Set the label text if a file is chosen
         if(this.sourceFile != null) {
             this.sourceFileName.setText(sourceFile.getName());
-            final int EXT_INDEX = sourceFile.getName().lastIndexOf(".");
-            // Set the target file name and incompatible target name
-            if(EXT_INDEX > 0) {
-                this.targetFileName=sourceFile.getName().substring(0, EXT_INDEX) + "_converted.json";
-                this.incompatibleFileName=sourceFile.getName().substring(0, EXT_INDEX) + "_incompatible.txt";
-            }
         }
-    }
-
-    @FXML
-    protected void handleGameTypeAction(ActionEvent e) {
-        this.gameType=gameTypeField.getValue();
     }
 
     @FXML
     protected void handleHintAction(ActionEvent e) {
-        this.includeHints=hintsField.isSelected();
-        // Hide Hint End row if not selected
-        this.hintEndField.setVisible(includeHints);
-        this.hintEndLabel.setVisible(includeHints);
-        // Reset Hint End row if not selected
-        if(!includeHints) {
-            hintEndField.setSelected(false);
-            this.includeHintEnds=false;
-        }
-    }
-
-    @FXML
-    protected void handleHintEndAction(ActionEvent e) {
-        this.includeHintEnds=this.includeHints && this.hintEndField.isSelected();
+        boolean includeHints=hintsField.isSelected();
     }
 
     @FXML
     protected void handleGivenAction(ActionEvent e) {
-        this.includeGivenLetters=this.givenField.isSelected();
-        // TODO: Toggle the given thing checkbox
-        this.numGivenLabel.setVisible(includeGivenLetters);
-        this.numGivenField.setVisible(includeGivenLetters);
+        boolean includeGiven=this.givenField.isSelected();
+        // Hide Given End row & Num Given row if not selected
+        this.givenEndField.setVisible(includeGiven);
+        this.givenEndLabel.setVisible(includeGiven);
+        this.numGivenLabel.setVisible(includeGiven);
+        this.numGivenField.setVisible(includeGiven);
+
         // Reset Num Given row if not selected
-        if(!includeGivenLetters) {
+        if(!includeGiven) {
+            givenEndField.setSelected(false);
             numGivenField.setValue(0);
-            this.numGivenLetters=0;
         }
     }
 
     @FXML
-    protected void handleNumGivenAction(ActionEvent e) {
-        this.numGivenLetters= (int) numGivenField.getValue();
-    }
-
-    @FXML
     protected void handleExportAction(ActionEvent e) {
-        // TODO: Validation
-        // TODO: Take in all the settings, and then do the export logic
+        // TODO: Validation?
+        // TODO: disable the export button if a file is not selected?
+        if(this.sourceFile == null) {
+            return;
+        }
+        // Get the game settings
+        GameSettings settings = new GameSettings(this.sourceFile, gameTypeField.getValue(), this.hintsField.isSelected(),
+        this.givenEndField.isSelected(), this.givenField.isSelected(), (int) this.numGivenField.getValue());
+
+//        System.out.println("File path: " + sourceFile.getAbsolutePath());
+//        System.out.println("Game: " + gameType.name());
+//        System.out.println("Hints: " + includeHints);
+//        if(includeHints) {
+//            System.out.println("Hint Ends: " + includeHintEnds);
+//        }
+//        System.out.println("Number of given letters: " + numGiven);
+
+        // TODO: do the export logic
+
+
     }
 }
